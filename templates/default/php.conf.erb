@@ -1,14 +1,21 @@
-<VirtualHost *:8080>
+<% if node['apache']['version'] != '2.4' -%>
+NameVirtualHost *:80
+<% end -%>
+
+<VirtualHost *:80>
   ServerName <%= @params[:server_name] %>
   ServerAlias <% @params[:server_aliases].each do |a| %><%= "#{a}" %> <% end %>
   DocumentRoot <%= @params[:docroot] %>
-  RewriteEngine On
   
   <Directory <%= @params[:docroot] %>>
     Options FollowSymLinks
-    AllowOverride None
+    AllowOverride FileInfo
+  <% if node['apache']['version'] == '2.4' -%>
+    Require all granted
+  <% else -%>
     Order allow,deny
     Allow from all
+  <% end -%>
   </Directory>
   
   <Directory />
@@ -18,17 +25,25 @@
 
   <Location /server-status>
     SetHandler server-status
-
+  <% if node['apache']['version'] == '2.4' -%>
+    Require local
+  <% else -%>
     Order Deny,Allow
     Deny from all
     Allow from 127.0.0.1
+  <% end -%>
   </Location>
 
-  LogLevel info
-  ErrorLog <%= node[:apache][:log_dir] %>/<%= @params[:name] %>-error.log
-  CustomLog <%= node[:apache][:log_dir] %>/<%= @params[:name] %>-access.log combined
-
   RewriteEngine On
-  RewriteLog <%= node[:apache][:log_dir] %>/<%= @application_name %>-rewrite.log
+  <%- if node['apache']['version'] == '2.4' -%>
+  LogLevel info rewrite:trace1
+  <%- else -%>
+  LogLevel info
+  RewriteLog <%= node['apache']['log_dir'] %>/<%= @application_name %>-rewrite.log
   RewriteLogLevel 0
+  <%- end -%>
+
+  ErrorLog <%= node['apache']['log_dir'] %>/<%= @params[:name] %>-error.log
+  CustomLog <%= node['apache']['log_dir'] %>/<%= @params[:name] %>-access.log combined
+
 </VirtualHost>
