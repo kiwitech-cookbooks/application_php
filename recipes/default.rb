@@ -21,7 +21,7 @@ package value_for_platform_family(debian: 'mysql-client', rhel: 'mysql')
 package 'tar' if platform_family?('rhel')
 package 'git'
 
-application "/var/www/#{app['shortname']}" do
+application "#{app['shortname']}" do
   path "/var/www/#{app['shortname']}"
   repository "#{app['app_source']['url']}"
   deploy_key "#{app['app_source']['ssh_key']}"
