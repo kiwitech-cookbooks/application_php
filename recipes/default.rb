@@ -31,7 +31,7 @@ application "#{app['shortname']}" do
   if node['platform_version'].to_f >= 16.04
     packages ["php-soap", "php-intl", "php-mbstring"] 
   else
-    packages ["php-soap", "php5-intl"] 
+    packages ["php-soap", "php5.6-intl", "php5.6-gd", "php5.6-curl", "php5.6-intl", "php5.6-json", "php5.6-mbstring", "php5.6-mcrypt", "php5.6-mysql", "php5.6-xml", "php5.6-zip", "composer"] 
   end
   mod_php_apache2
 end
