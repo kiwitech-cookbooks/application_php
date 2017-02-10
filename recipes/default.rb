@@ -14,6 +14,12 @@
 # limitations under the License.
 #
 
+Chef::Log.info 'apt-adding - php-5.6'
+apt_repository '5.6' do
+  uri 'http://ppa.launchpad.net/ondrej/php/ubuntu'
+  components ['main', 'stable']
+  trusted true
+end
 include_recipe 'build-essential'
 
 app = search(:aws_opsworks_app).first
@@ -28,10 +34,10 @@ application "#{app['shortname']}" do
   revision "#{app['app_source']['revision']}"
   owner node[:apache][:user]
   group node[:apache][:user]
-  if node['platform_version'].to_f >= 16.04
-    packages ["php-soap", "php-intl", "php-mbstring"] 
+  if node['application_php']['php_version'].to_f == 5.6
+    packages ["php-soap", "php5.6-intl", "php5.6-gd", "php5.6-curl", "php5.6-intl", "php5.6-json", "php5.6-mbstring", "php5.6-mcrypt", "php5.6-mysql", "php5.6-xml", "php5.6-zip"]
   else
-    packages ["php-soap", "php5.6-intl", "php5.6-gd", "php5.6-curl", "php5.6-intl", "php5.6-json", "php5.6-mbstring", "php5.6-mcrypt", "php5.6-mysql", "php5.6-xml", "php5.6-zip", "composer"] 
+    packages ["php-soap", "php-intl", "php-mbstring"]
   end
   mod_php_apache2
 end
