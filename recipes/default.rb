@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-Chef::Log.info 'apt-adding - php-5.6'
-apt_repository '5.6' do
+Chef::Log.info '***** The main PPA for PHP (5.6, 7.0, 7.1) with many PECL extensions *****'
+apt_repository 'php-main' do
   uri 'http://ppa.launchpad.net/ondrej/php/ubuntu'
   components ['main', 'stable']
   trusted true
@@ -37,7 +37,39 @@ application "#{app['shortname']}" do
   if node['application_php']['php_version'].to_f == 5.6
     packages ["php-soap", "php5.6-intl", "php5.6-gd", "php5.6-curl", "php5.6-intl", "php5.6-json", "php5.6-mbstring", "php5.6-mcrypt", "php5.6-mysql", "php5.6-xml", "php5.6-zip"]
   else
-    packages ["php-soap", "php-intl", "php-mbstring"]
+    packages ["php-soap", "php-intl", "php-mbstring", "composer"]
   end
   mod_php_apache2
+end
+  
+template "/var/www/#{app['shortname']}/shared/app.php" do
+  source "cakephp/app.php.erb"
+  owner node[:apache][:user]
+  group node[:apache][:user]
+  mode 0644
+end
+link "/var/www/#{app['shortname']}/current/config/app.php" do
+  to "/var/www/#{app['shortname']}/shared/app.php"
+end
+
+if "#{node['application_php']['composer']}"
+  Chef::Log.info 'Running composer install'
+  directory "/var/www/#{app['shortname']}/shared/vendor" do
+  owner node[:apache][:user]
+  group node[:apache][:user]
+  mode 0755
+end
+directory "/var/www/#{app['shortname']}/current/vendor" do
+  action :delete
+  recursive true
+end
+link "/var/www/#{app['shortname']}/current/vendor" do
+  to "/var/www/#{app['shortname']}/shared/vendor"
+end
+execute "composer install -n -q" do
+  cwd "/var/www/#{app['shortname']}/current"
+  user node[:apache][:user]
+end
+else
+  Chef::Log.info 'As opted by you, Composer not ran'
 end

@@ -37,7 +37,7 @@ application "#{app['shortname']}" do
   if node['application_php']['php_version'].to_f == 5.6
     packages ["php-soap", "php5.6-intl", "php5.6-gd", "php5.6-curl", "php5.6-intl", "php5.6-json", "php5.6-mbstring", "php5.6-mcrypt", "php5.6-mysql", "php5.6-xml", "php5.6-zip"]
   else
-    packages ["php-soap", "php-intl", "php-mbstring"]
+    packages ["php-soap", "php-intl", "php-mbstring", "composer"]
   end
 
   mod_php_apache2
@@ -48,14 +48,14 @@ application "#{app['shortname']}" do
             'driver' => 'Cake\Database\Driver\Mysql',
             'persistent' => false,
             'host' => 'localhost',
-            'username' => "#{app['shortname']}",
+            'username' => 'testu',
             'password' => 'secret',
-            'database' => "#{app['shortname']}",
+            'database' => 'testd',
             'encoding' => 'utf8',
             'timezone' => 'UTC',
-  )
+  	)
     owner node[:apache][:user]
     group node[:apache][:user]
+    composer true
   end
-
 end
